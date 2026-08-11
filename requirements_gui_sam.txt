@@ -1,0 +1,17 @@
+# TUY CHON - chi can cai file nay NEU muon dung nguon phat hien vat can
+# "SAM click-to-segment" (MobileSAM) trong app_gui.py. Cai SAU KHI da cai
+# requirements_gui.txt va da chay thu GUI thanh cong voi cac nguon con lai.
+#
+#   pip install -r requirements_gui.txt
+#   pip install -r requirements_gui_sam.txt
+#   pip install "git+https://github.com/ChaoningZhang/MobileSAM.git"
+#
+# CANH BAO: torch la thu vien RAT NANG (~100-800MB tuy ban CPU/GPU) va CO
+# THE ep pip ha cap Pillow xuong ban khong co wheel cho Python moi (xem ghi
+# chu trong requirements_gui.txt). Neu gap loi Pillow/zlib khi cai file
+# nay, thu cai lai `pip install --upgrade pillow` NGAY SAU khi cai xong 3
+# lenh tren.
+torch>=2.1
+torchvision>=0.16
+opencv-python-headless>=4.8
+timm>=0.9

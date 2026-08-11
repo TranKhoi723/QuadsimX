@@ -1,0 +1,35 @@
+# QUAN TRONG: streamlit-image-coordinates (goi bat toa do click chuot tren
+# anh) MOI CAP NHAT LAN CUOI 08/2025 (v0.4.0) va dung 1 API NOI BO cua
+# Streamlit (UseColumnWith) da bi Streamlit XOA trong cac ban RAT MOI
+# (~1.50+, xac nhan bang test truc tiep). Streamlit ban <1.40 thi VAN CON
+# UseColumnWith NHUNG lai GIOI HAN pillow<11 (pillow<11 khong co wheel
+# dung san cho Python 3.13/3.14 -> loi bien dich "RequiredDependencyException:
+# zlib" tren Windows khi pip phai tu build tu ma nguon).
+#
+# => streamlit==1.40.0 la phien ban DUY NHAT da kiem tra THUC TE thoa man
+# CA HAI dieu kien cung luc (con UseColumnWith + cho phep pillow>=11).
+# KHONG doi sang ">=" cho 2 dong duoi - da test truc tiep tren may that
+# (Linux + Windows) ngay 08/2026. Neu Streamlit/streamlit-image-coordinates
+# ra ban moi fix tan goc van de nay, kiem tra lai tai:
+# https://github.com/blackary/streamlit-image-coordinates/releases
+streamlit==1.40.0
+streamlit-image-coordinates==0.4.0
+numpy>=1.24
+matplotlib>=3.7
+# Pillow PHAI >=11 (khong de ">=9.5" chung chung) - cac ban Pillow cu hon
+# (vd 10.4.0) KHONG co wheel dung san cho Python 3.13/3.14, khien pip phai
+# tu bien dich tu ma nguon C va can zlib/thu vien he thong cai san tren may
+# -> loi "RequiredDependencyException: zlib" tren Windows. Pillow>=11 co
+# san wheel cho Python moi, khong can bien dich. streamlit==1.40.0 (dong
+# tren) la ban Streamlit DAU TIEN cho phep pillow>=11.
+pillow>=11
+scipy>=1.10
+requests>=2.28
+pytest>=7.4
+
+# --- CHI CAN FILE NAY LA DU de chay GUI (tai anh, click chon waypoint, mo
+# phong, xem bao cao chi so). Nguon phat hien vat can "SAM click-to-segment"
+# la TINH NANG TUY CHON RIENG, chuyen sang requirements_gui_sam.txt - xem
+# file do NEU muon dung SAM. Neu KHONG cai file do, moi tinh nang khac cua
+# app van chay binh thuong; sidebar se tu hien huong dan khi ban chon nguon
+# SAM ma chua du goi.

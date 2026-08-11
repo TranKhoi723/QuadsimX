@@ -1,0 +1,84 @@
+{
+  "calibration": {
+    "origin_px": [
+      400.0,
+      300.0
+    ],
+    "scale_m_per_px": 0.05,
+    "flip_y": true,
+    "image_size_px": [
+      800,
+      600
+    ],
+    "image_path": "test_map.png"
+  },
+  "default_altitude_m": 1.5,
+  "waypoints": [
+    {
+      "pixel": [
+        400,
+        300
+      ],
+      "alt_m": 1.0
+    },
+    {
+      "pixel": [
+        650,
+        250
+      ],
+      "alt_m": 1.5,
+      "yaw_deg": 45
+    },
+    {
+      "pixel": [
+        400,
+        550
+      ],
+      "alt_m": 1.2
+    }
+  ],
+  "no_fly_zones": [
+    {
+      "type": "polygon",
+      "points_px": [
+        [
+          150,
+          100
+        ],
+        [
+          299,
+          100
+        ],
+        [
+          299,
+          199
+        ],
+        [
+          150,
+          199
+        ]
+      ]
+    },
+    {
+      "type": "polygon",
+      "points_px": [
+        [
+          500,
+          350
+        ],
+        [
+          649,
+          350
+        ],
+        [
+          649,
+          499
+        ],
+        [
+          500,
+          499
+        ]
+      ]
+    }
+  ]
+}
