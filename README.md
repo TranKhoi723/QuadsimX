@@ -1,368 +1,188 @@
-markdown
-<div align="center">
-  <a href="#-english">🇬🇧 English</a> | <a href="#-tiếng-việt">🇻🇳 Tiếng Việt</a>
-</div>
+# QUADSIM — Phần mềm mô phỏng Quadcopter và lập kế hoạch đường bay
 
----
+## 1. Giới thiệu
 
-<a id="-english"></a>
-## 🇬🇧 English
+QUADSIM là phần mềm mô phỏng "Digital Twin" cho máy bay không người lái quadcopter. Phần mềm tích hợp các mô-đun chính:
 
-# QUADSIM — Quadcopter Simulation and Path Planning
+- Mô hình động lực học 6 bậc tự do (6-DOF) dựa trên phương trình Newton-Euler.
+- Bộ điều khiển Cascade PID 4 tầng (Vị trí → Vận tốc → Góc → Tốc độ góc).
+- Thuật toán lập kế hoạch đường bay A* kết hợp với làm mịn đường đi bằng Ramer-Douglas-Peucker (RDP).
+- Bốn phương án nhận diện vật cản: ngưỡng độ sáng, phân loại màu HSV, truy vấn OpenStreetMap, và SAM click-to-segment.
+- Giao diện web (Streamlit) cho phép tương tác bằng chuột, và giao diện dòng lệnh (CLI) cho các thao tác nhanh.
 
-**QUADSIM** is a Digital Twin simulation software for quadcopters, integrating 6-DOF dynamics, Cascade PID control, A* path planning, and multiple obstacle detection methods. Designed with a clear modular architecture, it is suitable for both beginners and advanced developers in flight mechanics and control systems.
+Phần mềm được thiết kế theo kiến trúc module, dễ dàng mở rộng và tích hợp.
 
-Users can interact with the software through:
-- **Web GUI** (Streamlit) — click-based interaction
-- **Command Line Interface (CLI)** — terminal menu
-- **Python Library** — import and extend
+## 2. Cài đặt
 
----
+### 2.1. Yêu cầu hệ thống
 
-## Features
+- Python 3.10 trở lên.
+- Pip (có sẵn khi cài Python).
+- (Khuyến nghị) Git để sao chép mã nguồn.
 
-| Feature | Description |
-|---------|-------------|
-| **6-DOF Dynamics** | Newton-Euler equations, RK4 integration, Euler angle representation |
-| **Cascade PID** | 4 layers: Position -> Velocity -> Attitude -> Rate with anti-windup |
-| **Path Planning** | A* algorithm with obstacle inflation and RDP simplification |
-| **Obstacle Detection** | 4 methods: threshold, HSV color, OpenStreetMap, SAM click-to-segment |
-| **Waypoint Manager** | Per-waypoint altitude, yaw, and epsilon (acceptance radius) |
-| **GUI** | Streamlit web interface with mouse interaction |
-| **Unit Testing** | 24 test cases validating physical invariants |
-| **Auto Tuning** | Nelder-Mead optimization for PID gains |
+### 2.2. Tải mã nguồn
 
----
+Mở terminal (Command Prompt trên Windows) và chạy:
 
-## Installation
-
-### System Requirements
-- **Python 3.10 or higher**
-- pip package manager
-- (Optional) Git for cloning
-
-### Quick Install (Windows)
-
-```cmd
-setup.bat
-Follow the menu to choose installation type:
-
-CLI only (minimal)
-
-GUI (with Streamlit)
-
-GUI + SAM (includes AI segmentation)
-
-Manual Install
-bash
-cd quadsim
-
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate      # Linux/macOS
-.venv\Scripts\activate          # Windows
-
-# Install dependencies
-pip install -r requirements_gui.txt
-
-# Optional: Install SAM for AI obstacle detection
-pip install -r requirements_gui_sam.txt
-pip install "git+https://github.com/ChaoningZhang/MobileSAM.git"
-Quick Start
-1. Web Interface (GUI)
-bash
-streamlit run app_gui.py
-Workflow:
-
-Upload map image
-
-Set scale (m/pixel)
-
-Detect obstacles (4 methods available)
-
-Place waypoints (manual click or A* auto)
-
-Adjust altitude, yaw, epsilon per waypoint
-
-Run simulation and view results
-
-2. Command Line Interface (CLI)
-bash
-python main.py
-Menu options:
-
-[1] Switch drone preset
-
-[2] View drone parameters
-
-[3] Open-loop scenario (ascend -> roll -> pitch -> yaw)
-
-[4] Single rotor offset test
-
-[5] Closed-loop PID control
-
-[0] Exit
-
-3. PID Auto-Tuning
-bash
-python tune_altitude_gain.py
-Results saved to outputs/pid_altitude_tuning_real.csv
-
-4. Run Unit Tests
-bash
-pytest tests/ -v
-Expected: 24/24 tests passed.
-
-Project Structure
-text
-quadsim/
-├── quadsim/                      # Core package
-│   ├── __init__.py
-│   ├── params.py                 # Drone parameters (Crazyflie 2.0)
-│   ├── mixer.py                  # Control allocation (omega ↔ wrench)
-│   ├── dynamics.py               # Newton-Euler 6-DOF + RK4
-│   ├── scenarios.py              # Open-loop test scenarios
-│   ├── controllers.py            # Cascade PID + WaypointManager
-│   ├── simulate.py               # Simulation loops
-│   ├── plotting.py               # Plot generation and saving
-│   ├── cli.py                    # Terminal interface
-│   ├── pathfinding.py            # A* + inflate + RDP
-│   ├── color_obstacles.py        # HSV-based obstacle detection
-│   ├── osm_obstacles.py          # OpenStreetMap query
-│   ├── sam_obstacles.py          # MobileSAM click-to-segment
-│   ├── waypoint_io.py            # JSON I/O and coordinate calibration
-│   ├── waypoint_editor.py        # Standalone waypoint picker
-│   └── metrics.py                # Performance metrics
-│
-├── assets/                        # Resources
-│   └── fonts/
-│       ├── DejaVuSans.ttf
-│       └── DejaVuSans-Bold.ttf
-│
-├── main.py                        # CLI entry point
-├── app_gui.py                     # GUI entry point
-├── tune_altitude_gain.py          # PID optimization script
-│
-├── requirements.txt               # Core dependencies
-├── requirements_gui.txt           # GUI dependencies
-├── requirements_gui_sam.txt       # GUI + SAM dependencies
-├── setup.bat                      # Windows auto-install script
-│
-├── README.md                      # This file
-└── .gitignore                     # Git ignore rules
-Technical Specifications
-Drone Model: Crazyflie 2.0
-Parameter	Value
-Mass	0.027 kg
-Wheelbase (diagonal)	0.092 m
-Ixx, Iyy	1.66e-5 kg·m²
-Izz	2.93e-5 kg·m²
-Thrust coefficient (kF)	2.359e-8 N/(rad/s)²
-Drag coefficient (kM)	1.297e-10 N·m/(rad/s)²
-Max motor speed	2513 rad/s
-Control Structure
-Layer	Time Constant	Gain Type
-Position	1.5 s	P
-Velocity	0.4 s	PID
-Attitude	0.12 s	P
-Rate	0.03 s	PID
-PID Optimization Result (vel_z channel)
-Gain Set	Overshoot	Settling Time	Steady Error	Saturation	Cost
-Baseline (2.500, 0.625, 0.125)	1.90%	4.30s	0.038m	0.0%	4.225
-Optimized (15.000, 2.999, 0.234)	0.00%	5.47s	0.025m	0.5%	3.253
-References
-T. Luukkonen, "Modelling and control of quadcopter," Aalto University, 2011.
-
-J. Forster, "System Identification of the Crazyflie 2.0 Nano Quadrocopter," ETH Zurich, 2015.
-
-K. Bouzgou, Y. Bestaoui, L. Benchikh, B. Ibari, Z. Ahmed-Foitih, "Dynamic modeling, simulation and PID controller of unmanned aerial vehicle UAV," 7th International Conference on Innovative Computing Technology (INTECH), 2017.
-
-L. Carlone, M. Ryll, "Quadrotor Dynamics," 16.485 Visual Navigation for Autonomous Vehicles (VNAV), MIT, Fall 2023.
-
-D. Mellinger, V. Kumar, "Minimum snap trajectory generation and control for quadrotors," IEEE International Conference on Robotics and Automation (ICRA), 2011.
-
-License
-MIT License
-
-Contact
-Author: Tran Anh Khoi
-
-
-<a id="-tiếng-việt"></a>
-
-🇻🇳 Tiếng Việt
-QUADSIM — Mô phỏng Quadcopter và Lập kế hoạch đường bay
-QUADSIM là phần mềm mô phỏng Digital Twin cho quadcopter, tích hợp động lực học 6-DOF, điều khiển Cascade PID, lập kế hoạch đường bay A* và nhiều phương án nhận diện vật cản. Với kiến trúc module rõ ràng, phần mềm phù hợp cho cả người mới bắt đầu và các nhà phát triển chuyên sâu về cơ học bay và hệ thống điều khiển.
-
-Người dùng có thể tương tác với phần mềm qua:
-
-Giao diện Web (GUI) — Streamlit, tương tác bằng chuột
-
-Giao diện dòng lệnh (CLI) — menu terminal
-
-Thư viện Python — import và mở rộng
-
-Tính năng
-Tính năng	Mô tả
-Động lực học 6-DOF	Phương trình Newton-Euler, tích phân RK4, biểu diễn góc Euler
-Cascade PID	4 tầng: Vị trí -> Vận tốc -> Góc -> Tốc độ góc, có anti-windup
-Lập kế hoạch đường bay	Thuật toán A* với phình vật cản và rút gọn RDP
-Nhận diện vật cản	4 phương án: ngưỡng tối, màu HSV, OpenStreetMap, SAM click-to-segment
-Quản lý waypoint	Độ cao, góc yaw và epsilon (bán kính chấp nhận) riêng từng điểm
-Giao diện GUI	Streamlit web, tương tác bằng chuột
-Kiểm thử tự động	24 test case kiểm tra bất biến vật lý
-Tối ưu tự động	Nelder-Mead tối ưu tham số PID
-Cài đặt
-Yêu cầu hệ thống
-Python 3.10 trở lên
-
-pip
-
-(Tùy chọn) Git để clone
-
-Cài đặt nhanh (Windows)
-cmd
-setup.bat
-Chọn loại cài đặt:
-
-CLI (cơ bản)
-
-GUI (có Streamlit)
-
-GUI + SAM (có AI nhận diện vật cản)
-
-Cài đặt thủ công
-bash
-# Clone repository
+```bash
 git clone https://github.com/yourusername/quadsim.git
 cd quadsim
+(Nếu không có Git, bạn có thể tải file ZIP từ GitHub và giải nén.)
 
-# Tạo môi trường ảo
+2.3. Tạo môi trường ảo (khuyến nghị)
+bash
 python -m venv .venv
-source .venv/bin/activate      # Linux/macOS
-.venv\Scripts\activate          # Windows
+Kích hoạt môi trường ảo:
 
-# Cài đặt thư viện
+Windows: .venv\Scripts\activate
+
+Linux / macOS: source .venv/bin/activate
+
+2.4. Cài đặt các thư viện phụ thuộc
+2.4.1. Phiên bản cơ bản (chạy CLI)
+bash
+pip install -r requirements.txt
+2.4.2. Phiên bản có giao diện web (GUI)
+bash
 pip install -r requirements_gui.txt
-
-# Tùy chọn: Cài SAM cho nhận diện vật cản bằng AI
+2.4.3. Phiên bản đầy đủ (GUI + SAM hỗ trợ nhận diện vật cản bằng AI)
+bash
+pip install -r requirements_gui.txt
 pip install -r requirements_gui_sam.txt
 pip install "git+https://github.com/ChaoningZhang/MobileSAM.git"
-Bắt đầu nhanh
-1. Giao diện Web (GUI)
-bash
-streamlit run app_gui.py
-Quy trình:
+Lưu ý: Phần SAM (Segment Anything) yêu cầu tải thêm model khoảng 40MB và thư viện PyTorch, có thể mất vài phút. Nếu bạn không cần tính năng này, có thể bỏ qua.
 
-Tải ảnh bản đồ
+2.4.4. Cài đặt tự động trên Windows (dùng script)
+Chạy file setup.bat trong thư mục dự án và chọn loại cài đặt mong muốn.
 
-Hiệu chỉnh tỉ lệ (m/pixel)
-
-Nhận diện vật cản (4 phương án)
-
-Đặt waypoint (click thủ công hoặc A* tự động)
-
-Chỉnh sửa độ cao, yaw, epsilon từng điểm
-
-Chạy mô phỏng và xem kết quả
-
-2. Giao diện dòng lệnh (CLI)
+3. Hướng dẫn sử dụng
+3.1. Chạy giao diện dòng lệnh (CLI)
 bash
 python main.py
-Menu chính:
+Menu chính sẽ hiện ra với các tùy chọn:
 
-[1] Đổi drone preset
+[1] Đổi drone (preset hiện có: Crazyflie 2.0 và X-Custom)
 
 [2] Xem thông số drone
 
-[3] Chạy kịch bản vòng hở
+[3] Chạy kịch bản vòng hở (leo cao → roll → pitch → yaw)
 
-[4] Kiểm tra rotor lệch
+[4] Chạy kịch bản rotor lệch (mô phỏng lỗi động cơ)
 
-[5] Điều khiển vòng kín PID
+[5] Chạy mô phỏng vòng kín với bộ điều khiển Cascade PID (có thể nhập setpoint)
 
 [0] Thoát
 
-3. Tối ưu PID tự động
+Các đồ thị kết quả sẽ được lưu vào thư mục outputs/ dưới dạng file PNG.
+
+3.2. Chạy giao diện web (GUI)
+bash
+streamlit run app_gui.py
+Trình duyệt sẽ tự động mở tại địa chỉ http://localhost:8501.
+
+Quy trình thao tác trên GUI:
+
+Tải ảnh bản đồ (định dạng PNG, JPG, JPEG, BMP).
+
+Hiệu chỉnh tỉ lệ (m/pixel) để chuyển đổi tọa độ pixel sang mét.
+
+Phát hiện vùng cấm bay (chọn một trong bốn phương án):
+
+Ngưỡng độ sáng: thích hợp với sơ đồ vẽ tay.
+
+Phân loại màu HSV: cho ảnh vệ tinh (phân biệt cây, nước, mái nhà).
+
+OpenStreetMap: cần nhập tọa độ GPS của hai góc ảnh, độ chính xác cao.
+
+SAM click-to-segment: dùng chuột click lên vật thể, AI sẽ tự khoanh vùng.
+
+Đặt waypoint:
+
+Thủ công: click lên ảnh để thêm từng điểm.
+
+Tự động (A*): click điểm đầu và điểm cuối, hệ thống tự tìm đường né vật cản.
+
+Chỉnh sửa waypoint trong bảng bên phải: độ cao (m), góc yaw (độ), và bán kính epsilon (m) riêng từng điểm.
+
+Chạy mô phỏng: nhấn nút "Chạy mô phỏng" và xem quỹ đạo bay, đồ thị vị trí/góc/tốc độ động cơ.
+
+Lưu / tải file JSON: xuất waypoints và vùng cấm bay để dùng lại sau.
+
+3.3. Tối ưu tham số PID tự động
+Chạy script:
+
 bash
 python tune_altitude_gain.py
-Kết quả lưu tại outputs/pid_altitude_tuning_real.csv
+Script sử dụng thuật toán Nelder-Mead để tìm bộ ba (Kp, Ki, Kd) tối ưu cho kênh vận tốc đứng (vel_z). Kết quả sẽ được lưu vào file CSV và đồ thị so sánh đáp ứng trước/sau tối ưu trong thư mục outputs/.
 
-4. Chạy kiểm thử
+3.4. Chạy bộ kiểm thử tự động
 bash
 pytest tests/ -v
-Kết quả: 24/24 test PASSED.
+Dự kiến 24 test case đều PASSED, kiểm tra các bất biến vật lý như rơi tự do, hover, tính trực giao của ma trận xoay, và hội tụ của RK4.
 
-Cấu trúc dự án
+4. Cấu trúc thư mục
 text
 quadsim/
-├── quadsim/                      # Package lõi
+├── quadsim/                      # Package chính (các module tính toán)
 │   ├── __init__.py
-│   ├── params.py                 # Tham số drone (Crazyflie 2.0)
-│   ├── mixer.py                  # Phân bổ điều khiển (omega ↔ wrench)
-│   ├── dynamics.py               # Newton-Euler 6-DOF + RK4
+│   ├── params.py                 # Tham số drone (Crazyflie 2.0, X-Custom)
+│   ├── mixer.py                  # Phân bổ điều khiển (tốc độ động cơ ↔ lực/mô-men)
+│   ├── dynamics.py               # Động lực học Newton-Euler 6-DOF + RK4
 │   ├── scenarios.py              # Kịch bản vòng hở
-│   ├── controllers.py            # Cascade PID + WaypointManager
+│   ├── controllers.py            # Cascade PID và WaypointManager
 │   ├── simulate.py               # Vòng lặp mô phỏng
-│   ├── plotting.py               # Vẽ và lưu đồ thị
-│   ├── cli.py                    # Giao diện terminal
-│   ├── pathfinding.py            # A* + inflate + RDP
-│   ├── color_obstacles.py        # Nhận diện vật cản HSV
-│   ├── osm_obstacles.py          # Truy vấn OpenStreetMap
-│   ├── sam_obstacles.py          # SAM click-to-segment
-│   ├── waypoint_io.py            # JSON + hiệu chỉnh tọa độ
+│   ├── plotting.py               # Vẽ đồ thị
+│   ├── cli.py                    # Giao diện dòng lệnh
+│   ├── pathfinding.py            # Thuật toán A* và RDP
+│   ├── color_obstacles.py        # Nhận diện vật cản theo màu HSV
+│   ├── osm_obstacles.py          # Lấy dữ liệu vật cản từ OpenStreetMap
+│   ├── sam_obstacles.py          # MobileSAM click-to-segment
+│   ├── waypoint_io.py            # Đọc/ghi JSON, hiệu chỉnh tọa độ
 │   ├── waypoint_editor.py        # Công cụ chọn waypoint độc lập
-│   └── metrics.py                # Tiêu chí đánh giá
+│   └── metrics.py                # Các chỉ số đánh giá hiệu năng
 │
-├── assets/                        # Tài nguyên
+├── assets/                        # Tài nguyên (font chữ)
 │   └── fonts/
 │       ├── DejaVuSans.ttf
 │       └── DejaVuSans-Bold.ttf
 │
 ├── main.py                        # Điểm vào CLI
-├── app_gui.py                     # Điểm vào GUI
+├── app_gui.py                     # Điểm vào GUI (Streamlit)
 ├── tune_altitude_gain.py          # Tối ưu PID
 │
 ├── requirements.txt               # Thư viện cơ bản
 ├── requirements_gui.txt           # Thư viện GUI
 ├── requirements_gui_sam.txt       # Thư viện GUI + SAM
-├── setup.bat                      # Cài đặt tự động (Windows)
+├── setup.bat                      # Script cài đặt tự động (Windows)
 │
-├── README.md                      # File này
-└── .gitignore                     # Bỏ qua file rác
-Thông số kỹ thuật
-Drone: Crazyflie 2.0
+└── README.md                      # File hướng dẫn này
+5. Thông số drone mặc định
+Phần mềm sử dụng thông số của drone Crazyflie 2.0 (từ nghiên cứu của Förster 2015):
+
 Tham số	Giá trị
 Khối lượng	0.027 kg
-Đường chéo	0.092 m
-Ixx, Iyy	1.66e-5 kg·m²
-Izz	2.93e-5 kg·m²
-Hệ số lực đẩy (kF)	2.359e-8 N/(rad/s)²
-Hệ số mô men cản (kM)	1.297e-10 N·m/(rad/s)²
-Tốc độ động cơ max	2513 rad/s
-Cấu trúc điều khiển
-Tầng	Hằng số thời gian	Loại
-Vị trí	1.5 s	P
-Vận tốc	0.4 s	PID
-Góc	0.12 s	P
-Tốc độ góc	0.03 s	PID
-Kết quả tối ưu PID (kênh vel_z)
-Bộ gain	Vọt lố	Thời gian xác lập	Sai số xác lập	Bão hòa	Cost
-Baseline (2.500, 0.625, 0.125)	1.90%	4.30s	0.038m	0.0%	4.225
-Tối ưu (15.000, 2.999, 0.234)	0.00%	5.47s	0.025m	0.5%	3.253
-Tài liệu tham khảo
+Đường chéo (giữa hai động cơ đối diện)	0.092 m
+Mô-men quán tính Ixx, Iyy	1.66e-5 kg·m²
+Mô-men quán tính Izz	2.93e-5 kg·m²
+Hệ số lực đẩy kF	2.359e-8 N/(rad/s)²
+Hệ số mô-men cản kM	1.297e-10 N·m/(rad/s)²
+Tốc độ góc cực đại của động cơ	2513 rad/s
+Bạn có thể chọn drone khác (ví dụ X-Custom) hoặc thêm preset mới trong file params.py.
+
+6. Các tài liệu tham khảo chính
 T. Luukkonen, "Modelling and control of quadcopter," Aalto University, 2011.
 
-J. Forster, "System Identification of the Crazyflie 2.0 Nano Quadrocopter," ETH Zurich, 2015.
+J. Förster, "System Identification of the Crazyflie 2.0 Nano Quadrocopter," ETH Zurich, 2015.
 
-K. Bouzgou, Y. Bestaoui, L. Benchikh, B. Ibari, Z. Ahmed-Foitih, "Dynamic modeling, simulation and PID controller of unmanned aerial vehicle UAV," 7th International Conference on Innovative Computing Technology (INTECH), 2017.
+K. Bouzgou et al., "Dynamic modeling, simulation and PID controller of UAV," INTECH, 2017.
 
-L. Carlone, M. Ryll, "Quadrotor Dynamics," 16.485 Visual Navigation for Autonomous Vehicles (VNAV), MIT, Fall 2023.
+L. Carlone, M. Ryll, "Quadrotor Dynamics," MIT 16.485, 2023.
 
-D. Mellinger, V. Kumar, "Minimum snap trajectory generation and control for quadrotors," IEEE International Conference on Robotics and Automation (ICRA), 2011.
+D. Mellinger, V. Kumar, "Minimum snap trajectory generation," ICRA, 2011.
 
-Giấy phép
-MIT License
-
-Liên hệ
+7. Liên hệ và giấy phép
 Tác giả: Trần Anh Khôi
+
+Giấy phép: MIT (xem file LICENSE)
+
+Chúc bạn sử dụng phần mềm hiệu quả!
