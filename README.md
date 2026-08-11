@@ -22,7 +22,7 @@ QUADSIM is a Digital Twin simulation software for quadcopter UAVs, integrating 6
 - Web GUI (Streamlit) with mouse interaction
 - Command Line Interface (CLI) for quick operations
 - Automated PID gain optimization (Nelder-Mead)
-- Unit testing with 24 test cases
+- Unit testing with 31 test cases
 
 ---
 
@@ -110,7 +110,7 @@ Results saved to `outputs/pid_altitude_tuning_real.csv`
 pytest tests/ -v
 ```
 
-Expected: 24/24 tests passed.
+Expected: 31/31 tests passed.
 
 ---
 
@@ -219,7 +219,7 @@ QUADSIM là phần mềm mô phỏng Digital Twin cho máy bay không người l
 - Giao diện web (Streamlit) tương tác bằng chuột
 - Giao diện dòng lệnh (CLI) cho thao tác nhanh
 - Tối ưu tham số PID tự động (Nelder-Mead)
-- Kiểm thử tự động với 24 test case
+- Kiểm thử tự động với 31 test case
 
 ---
 
@@ -307,7 +307,7 @@ Kết quả lưu tại `outputs/pid_altitude_tuning_real.csv`
 pytest tests/ -v
 ```
 
-Kết quả: 24/24 test PASSED.
+Kết quả: 31/31 test PASSED.
 
 ---
 
